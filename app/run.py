@@ -10,11 +10,16 @@ from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
-
+import re
 
 app = Flask(__name__)
 
 def tokenize(text):
+    url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    detected_urls = re.findall(url_regex, text)
+    for url in detected_urls:
+        text = text.replace(url, "urlplaceholder")
+
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
 
@@ -26,11 +31,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///../data/DisasterResponse.db')
+df = pd.read_sql_table(con=engine,table_name='raw_data')
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+model = joblib.load("../models/classifier.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -83,6 +88,7 @@ def go():
     # use model to predict classification for query
     classification_labels = model.predict([query])[0]
     classification_results = dict(zip(df.columns[4:], classification_labels))
+    print(classification_results)
 
     # This will render the go.html Please see that file. 
     return render_template(

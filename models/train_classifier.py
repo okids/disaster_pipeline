@@ -1,24 +1,82 @@
 import sys
+from sqlalchemy import create_engine
+import pandas as pd
+import nltk
+nltk.download(['punkt', 'wordnet', 'averaged_perceptron_tagger'])
+
+import re
+import numpy as np
+import pandas as pd
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+
+from sklearn.metrics import classification_report
+# from sklearn.metrics import multilabel_confusion_matrix
+from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline, FeatureUnion
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from joblib import dump, load
 
 
 def load_data(database_filepath):
-    pass
+    
+    engine = create_engine('sqlite:///{}'.format(database_filepath))
+    df = pd.read_sql_table(con=engine,table_name='raw_data')
+    X = df['message']
+    Y = df.drop(columns=['id','message','original','genre'])
+    catetgory_names = Y.columns
+    return X,Y,catetgory_names
 
 
 def tokenize(text):
-    pass
+    
+    
+    url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    detected_urls = re.findall(url_regex, text)
+    for url in detected_urls:
+        text = text.replace(url, "urlplaceholder")
+
+    tokens = word_tokenize(text)
+    lemmatizer = WordNetLemmatizer()
+
+    clean_tokens = []
+    for tok in tokens:
+        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
+        clean_tokens.append(clean_tok)
+
+    return clean_tokens
 
 
 def build_model():
-    pass
+    
+    pipeline = Pipeline([
+        ('features', FeatureUnion([
+
+            ('text_pipeline', Pipeline([
+                ('vect', CountVectorizer(tokenizer=tokenize)),
+                ('tfidf', TfidfTransformer())
+            ]))
+        ])),
+
+        ('clf', RandomForestClassifier())
+    ])
+    return pipeline
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    
+    y_pred = model.predict(X_test)
+    
+    for i in range(0,len(category_names)):
+        print(category_names[i], classification_report(y_pred[:,i],Y_test[category_names[i]]))
+
 
 
 def save_model(model, model_filepath):
-    pass
+    dump(model, model_filepath) 
 
 
 def main():
