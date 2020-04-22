@@ -22,17 +22,24 @@ from joblib import dump, load
 
 
 def load_data(database_filepath):
+    '''
+    INPUT - database filepath 
+    OUTPUT - X : text messages from dataframe, Y : categories names from the dataframe, category_names : cat 
+    '''
     
     engine = create_engine('sqlite:///{}'.format(database_filepath))
     df = pd.read_sql_table(con=engine,table_name='raw_data')
     X = df['message']
     Y = df.drop(columns=['id','message','original','genre'])
-    catetgory_names = Y.columns
-    return X,Y,catetgory_names
+    category_names = Y.columns
+    return X,Y,category_names
 
 
 def tokenize(text):
-    
+    '''
+    INPUT - text
+    OUTPUT - word tokens
+    '''
     
     url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     detected_urls = re.findall(url_regex, text)
@@ -51,7 +58,10 @@ def tokenize(text):
 
 
 def build_model():
-    
+    '''
+    Function to generate machine learning pipeline 
+    OUTPUT - Pipeline
+    '''
     pipeline = Pipeline([
         ('features', FeatureUnion([
 
@@ -67,7 +77,12 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    '''
+    Generate classification report from the models for each category. 
+    Iteration each column and print classification report
     
+    INPUT - model : pipeline, X_test : text dataframe, Y_test : array of prediction result, category_names : category name
+    '''
     y_pred = model.predict(X_test)
     
     for i in range(0,len(category_names)):
@@ -76,6 +91,12 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    '''
+    Save model into pickle file
+    INPUT - model : pipeline, model_filepath : model filepath
+    '''
+
+    
     dump(model, model_filepath) 
 
 

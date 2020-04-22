@@ -4,6 +4,12 @@ from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
+    '''
+    INPUT - messages_filepath : messages filepath, categories_filepath : categories filepath  
+    OUTPUT - df : dataframe combination of messages and categories
+    '''
+    
+    
     messages = pd.read_csv(messages_filepath)
     # load categories dataset
     categories = pd.read_csv(categories_filepath)
@@ -30,11 +36,25 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
+    '''
+    Return dataframe with clean and no duplicates dataset
+    
+    INPUT - df : input dataframe
+    OUTPUT - df : cleaned dataframe
+    '''
+    
     df['message'] = df['message'].str.lower()
+    df = df.drop_duplicates()
     return df
 
 
 def save_data(df, database_filename):
+    '''
+    This function save dataframe into sqlite db
+    
+    INPUT - df : input dataframe, database_filename : db filename
+    '''
+    
     engine = create_engine('sqlite:///{}'.format(database_filename))
     df.to_sql('raw_data', engine, index=False, if_exists='replace')  
 
