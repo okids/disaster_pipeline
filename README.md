@@ -1,5 +1,18 @@
 # Disaster Response Pipeline Project
 
+
+This project is web app to predict if the sentence is belong to any disaster categories. It is containing ETL and machine learning pipeline process. There are 3 main python script :
+
+1. /app/run.py for running the web app.
+2. /data/process_data.py for running the ETL.
+3. /models/train_classifier.py for train the data.
+
+### General flow :
+
+1. Load and Clean data, save it into sqlite db.
+2. Train the cleaned data (tokenization, TFIDF, Classify) and save it into pickle.
+3. Run the webapp.
+
 ### Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
 
