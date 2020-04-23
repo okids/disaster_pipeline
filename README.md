@@ -13,6 +13,14 @@ This project is web app to predict if the sentence is belong to any main categor
 2. Train the cleaned data (tokenization, TFIDF, Classify) and save it into pickle.
 3. Run the webapp.
 
+
+### Notebook exploration :
+
+There are two jupyter notebooks that is used to explore the data and machine learning models :
+
+1. /notebook/ML Pipeline Preparation.ipynb for exploring and developing the model.
+2. /notebook/ETL Pipeline Preparation.ipynb for exploring ETL and data cleaning.
+
 ### Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
 
