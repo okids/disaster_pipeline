@@ -51,9 +51,12 @@ def index():
     
     # extract data needed for visuals
     # TODO: Below is an example - modify to extract data for your own visuals
-    genre_counts = df.groupby('genre').count()['message']
+    genre_counts = df.groupby('genre').count()['message'].sort_values(ascending=False)
     genre_names = list(genre_counts.index)
     
+    category_names = list(df.drop(columns=['id','message','original','genre']).columns)
+    category_counts = df[category_names].sum().sort_values(ascending=False)
+
 #     create visuals
 #     TODO: Below is an example - modify to create your own visuals
     graphs = [
@@ -72,6 +75,24 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=category_names,
+                    y=category_counts
+                )
+            ],
+
+            'layout': {
+                'title': 'Messages by Categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Categories"
                 }
             }
         }
@@ -95,7 +116,7 @@ def search():
     # use model to predict classification for query
     classification_labels = model.predict([query])[0]
     classification_results = dict(zip(df.columns[4:], classification_labels))
-    print(classification_results)
+#     print(classification_results)
 
     # This will render the search.html Please see that file. 
     return render_template(
