@@ -13,6 +13,7 @@ from nltk.stem import WordNetLemmatizer
 from sklearn.metrics import classification_report
 # from sklearn.metrics import multilabel_confusion_matrix
 from sklearn.model_selection import GridSearchCV
+from sklearn.multioutput import MultiOutputClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline, FeatureUnion
@@ -71,9 +72,23 @@ def build_model():
             ]))
         ])),
 
-        ('clf', RandomForestClassifier())
+        ('clf', MultiOutputClassifier(RandomForestClassifier()))
     ])
-    return pipeline
+    
+    parameters = {
+    #     'features__text_pipeline__vect__ngram_range': ((1, 1), (1, 2)),
+    #     'features__text_pipeline__vect__max_df': (0.5, 0.75, 1.0),
+        'features__text_pipeline__vect__max_features': (None, 5000, 10000),
+    #     'features__text_pipeline__tfidf__use_idf': (True, False),
+        'features__transformer_weights': (
+            {'text_pipeline': 1, 'starting_verb': 0.5},
+    #         {'text_pipeline': 0.5, 'starting_verb': 1},
+    #         {'text_pipeline': 0.8, 'starting_verb': 1},
+        )
+    }
+
+    cv = GridSearchCV(pipeline, param_grid=parameters,n_jobs=2)
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
