@@ -4,7 +4,8 @@ import pandas as pd
 
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-
+import numpy as np
+import plotly.graph_objs as go
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
@@ -53,8 +54,8 @@ def index():
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
     
-    # create visuals
-    # TODO: Below is an example - modify to create your own visuals
+#     create visuals
+#     TODO: Below is an example - modify to create your own visuals
     graphs = [
         {
             'data': [
@@ -76,17 +77,18 @@ def index():
         }
     ]
     
+    
     # encode plotly graphs in JSON
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
     graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
     
     # render web page with plotly graphs
-    return render_template('master.html', ids=ids, graphJSON=graphJSON)
+    return render_template('master.html', graphJSON=graphJSON, ids=ids)
 
 
 # web page that handles user query and displays model results
-@app.route('/go')
-def go():
+@app.route('/search')
+def search():
     # save user input in query
     query = request.args.get('query', '') 
 
@@ -95,12 +97,14 @@ def go():
     classification_results = dict(zip(df.columns[4:], classification_labels))
     print(classification_results)
 
-    # This will render the go.html Please see that file. 
+    # This will render the search.html Please see that file. 
     return render_template(
-        'go.html',
+        'search.html',
         query=query,
         classification_result=classification_results
     )
+
+
 
 
 def main():
